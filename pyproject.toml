@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai_commit"
+version = "0.1.0"
+description = "AI-powered commit message generation utility"
+authors = [
+    { name = "sidbaskaran" }
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "python-dotenv",
+    "openai",
+    "together",
+    "pre-commit"
+]
+
+[project.urls]
+Homepage = "https://github.com/sidbaskaran/ai-commit"
+
+[project.scripts]
+ai-commit = "ai_commit.cli:main"
