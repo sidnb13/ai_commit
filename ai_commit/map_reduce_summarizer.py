@@ -60,9 +60,65 @@ You are an expert software developer writing git commit messages. The following 
 Project context:
 {codebase_context}
 
-Write a single, short (max 1 line, {COMMIT_MSG_WORD_LIMIT} words), human-like commit message that best describes the overall intent and effect of all these changes together. Use correct tense and summarize as if for your teammates.
+First, determine the most appropriate conventional commit type from this list:
+- feat: A new feature
+- fix: A bug fix
+- docs: Documentation only changes
+- style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- refactor: A code change that neither fixes a bug nor adds a feature
+- perf: A code change that improves performance
+- test: Adding missing tests or correcting existing tests
+- build: Changes that affect the build system or external dependencies
+- ci: Changes to CI configuration files and scripts
+- chore: Other changes that don't modify src or test files
+- revert: Reverts a previous commit
+
+Then write a single, short (max 1 line, {COMMIT_MSG_WORD_LIMIT} words), human-like commit message that best describes the overall intent and effect of all these changes together. Use correct tense and summarize as if for your teammates.
+
+Format: <type>: <description>
+Example: "feat: add user authentication system"
+Example: "fix: resolve memory leak in data processing"
+Example: "docs: update API documentation"
 """
     result = await llm.complete(prompt, model)
+
+    # Ensure the result has a conventional commit prefix
+    result = result.strip()
+    conventional_types = [
+        "feat",
+        "fix",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+        "build",
+        "ci",
+        "chore",
+        "revert",
+    ]
+    has_prefix = any(
+        result.lower().startswith(f"{commit_type}:")
+        for commit_type in conventional_types
+    )
+
+    if not has_prefix:
+        # Fallback: try to determine type based on keywords in the message
+        message_lower = result.lower()
+        if any(
+            word in message_lower
+            for word in ["add", "implement", "create", "introduce"]
+        ):
+            result = f"feat: {result}"
+        elif any(
+            word in message_lower for word in ["fix", "resolve", "correct", "repair"]
+        ):
+            result = f"fix: {result}"
+        elif any(word in message_lower for word in ["update", "change", "modify"]):
+            result = f"chore: {result}"
+        else:
+            result = f"chore: {result}"
+
     return result
 
 
